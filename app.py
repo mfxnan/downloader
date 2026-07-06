@@ -80,8 +80,8 @@ def video_info(data: VideoRequest):
 
     options = {
         "quiet": True,
-        "skip_download": True,
-        "noplaylist": True
+        "skip_download": True
+        # "noplaylist": True dihapus agar bisa membaca isi slide carousel
     }
 
     try:
@@ -91,6 +91,22 @@ def video_info(data: VideoRequest):
                 data.url,
                 download=False
             )
+
+        # --- LOGIKA FILTER CAROUSEL / SLIDE INSTAGRAM ---
+        if "entries" in info:
+            video_entry = None
+            for entry in info["entries"]:
+                # Lewati foto, cari yang berekstensi mp4 atau punya codec video
+                if entry.get("ext") == "mp4" or entry.get("vcodec") not in ["none", None]:
+                    video_entry = entry
+                    break
+            
+            if not video_entry:
+                raise Exception("Tidak ada video yang ditemukan di postingan ini.")
+            
+            # Ganti info playlist dengan info spesifik video tersebut
+            info = video_entry
+        # ------------------------------------------------
 
         return {
             "success": True,
@@ -123,18 +139,35 @@ def download(data: VideoRequest):
     options = {
         "format": "bestvideo+bestaudio/best",
         "merge_output_format": "mp4",
-        "outtmpl": str(DOWNLOAD_DIR / "%(title)s.%(ext)s"),
-        "noplaylist": True
+        "outtmpl": str(DOWNLOAD_DIR / "%(title)s.%(ext)s")
+        # "noplaylist": True dihapus
     }
 
     try:
 
         with yt_dlp.YoutubeDL(options) as ydl:
 
-            ydl.extract_info(
+            # 1. Ekstrak info tanpa download langsung
+            info = ydl.extract_info(
                 data.url,
-                download=True
+                download=False
             )
+
+            # 2. Filter khusus slide video jika itu adalah carousel
+            if "entries" in info:
+                video_entry = None
+                for entry in info["entries"]:
+                    if entry.get("ext") == "mp4" or entry.get("vcodec") not in ["none", None]:
+                        video_entry = entry
+                        break
+                
+                if not video_entry:
+                    raise Exception("Tidak ada video yang ditemukan di postingan ini.")
+                
+                info = video_entry
+            
+            # 3. Download HANYA data video yang sudah difilter di atas
+            ydl.process_ie_result(info, download=True)
 
         after = set(DOWNLOAD_DIR.glob("*"))
 
