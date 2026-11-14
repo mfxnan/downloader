@@ -1,69 +1,141 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DL Repostium</title>
+    <meta
+      name="description"
+      content="DL Repostium downloads media quickly and securely from supported sources."
+    />
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-wrap">
+          <div class="brand-mark">D</div>
+          <div>
+            <p class="eyebrow">MEDIA DOWNLOADER</p>
+            <h1>DL Repostium</h1>
+          </div>
+        </div>
+        <div class="status-pill" id="service-status">Live</div>
+      </header>
 
-<head>
+      <main class="dashboard">
+        <section class="panel hero-panel">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">HOME</p>
+              <h2>Download media in seconds</h2>
+            </div>
+          </div>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+          <div class="input-row">
+            <input
+              id="video-url"
+              type="url"
+              placeholder="Paste a YouTube, TikTok, Instagram, Facebook, X, Reddit, or other supported media URL"
+            />
+            <button id="analyze-btn" class="primary-btn">Analyze</button>
+          </div>
 
-    <title>Repostium Downloader</title>
+          <div class="quick-tags">
+            <span>YouTube</span>
+            <span>TikTok</span>
+            <span>Instagram</span>
+            <span>Facebook</span>
+            <span>Reddit</span>
+            <span>More</span>
+          </div>
+        </section>
 
-    <link rel="stylesheet" href="/static/css/style.css">
+        <section class="panel preview-panel">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">PREVIEW</p>
+              <h2>Info & options</h2>
+            </div>
+          </div>
 
-</head>
+          <div id="loading" class="loading-box hidden">Fetching media information…</div>
 
-<body>
+          <div id="result" class="result-box hidden">
+            <img id="thumbnail" alt="Media thumbnail" />
+            <div class="meta-block">
+              <h3 id="title">-</h3>
+              <p id="platform">-</p>
+              <p id="uploader">-</p>
+              <p id="duration">-</p>
+            </div>
+            <div class="controls-row">
+              <select id="quality-select">
+                <option value="best">Best quality</option>
+                <option value="audio">Audio only</option>
+              </select>
+              <button id="download-btn" class="primary-btn">Download</button>
+            </div>
+          </div>
+        </section>
 
-<div class="container">
+        <section class="panel bulk-panel">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">BULK DOWNLOADER</p>
+              <h2>Multiple URLs</h2>
+            </div>
+          </div>
 
-    <h1>⚡ Repostium Downloader</h1>
+          <textarea id="bulk-urls" rows="6" placeholder="One URL per line"></textarea>
+          <div class="controls-row stacked-mobile">
+            <button id="bulk-check-btn" class="secondary-btn">Check duplicates</button>
+            <button id="bulk-download-btn" class="primary-btn">Download all</button>
+          </div>
+          <div id="bulk-status" class="bulk-status"></div>
+        </section>
 
-    <p class="subtitle">
-        Download Video Kualitas Terbaik
-    </p>
+        <section class="panel history-panel">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">HISTORY</p>
+              <h2>Recent downloads</h2>
+            </div>
+            <button id="clear-history" class="ghost-btn">Clear</button>
+          </div>
+          <ul id="history-list" class="history-list">
+            <li>No downloads yet.</li>
+          </ul>
+        </section>
 
-    <div class="search-box">
-
-        <input
-            id="video-url"
-            type="text"
-            placeholder="Tempel URL Video..."
-        >
-
-        <button id="check-btn">
-            Download
-        </button>
-
+        <section class="panel settings-panel">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">SETTINGS</p>
+              <h2>Preferences</h2>
+            </div>
+          </div>
+          <div class="settings-grid">
+            <label>
+              Default format
+              <select id="default-format">
+                <option value="video">Video</option>
+                <option value="audio">Audio</option>
+              </select>
+            </label>
+            <label>
+              Theme
+              <select id="theme-select">
+                <option value="dark">Dark</option>
+                <option value="midnight">Midnight</option>
+              </select>
+            </label>
+          </div>
+        </section>
+      </main>
     </div>
 
-    <div id="loading">
-
-        Mengambil informasi video...
-
-    </div>
-
-    <div id="result">
-
-        <img id="thumbnail">
-
-        <h2 id="title"></h2>
-
-        <p id="uploader"></p>
-
-        <p id="duration"></p>
-
-        <button id="download-btn">
-
-            Download HD
-
-        </button>
-
-    </div>
-
-</div>
-
-<script src="/static/js/script.js"></script>
-
-</body>
-
+    <script src="/static/js/script.js"></script>
+  </body>
 </html>
+
