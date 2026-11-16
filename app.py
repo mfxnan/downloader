@@ -208,7 +208,15 @@ def normalize_video_info(raw_info: Dict[str, Any]) -> Dict[str, Any]:
         "title": info.get("title"),
         "uploader": info.get("uploader") or info.get("channel") or "Unknown",
         "duration": info.get("duration"),
-        "thumbnail": info.get("thumbnail") or info.get("thumbnails", [{}])[-1].get("url"),
+        "thumbnail": info.get("thumbnail")
+        or next(
+            (
+                thumbnail.get("url")
+                for thumbnail in reversed(info.get("thumbnails") or [])
+                if isinstance(thumbnail, dict) and thumbnail.get("url")
+            ),
+            None,
+        ),
         "webpage_url": info.get("webpage_url") or info.get("url"),
         "view_count": info.get("view_count"),
         "like_count": info.get("like_count"),
@@ -354,13 +362,13 @@ async def api_playlist(payload: VideoRequest):
 
 @app.post("/api/download")
 async def api_download(payload: VideoRequest):
-    active_jobs = sum(1 for job in jobs.values() if job["status"] in {"queued", "running"})
-    if active_jobs >= MAX_CONCURRENT_DOWNLOADS:
-        raise HTTPException(status_code=429, detail="Download queue limit reached. Please wait for a running task to finish.")
-
-    job_id = uuid.uuid4().hex
-    record = _generate_job_record(job_id, payload.url, payload.mode)
     with jobs_lock:
+        active_jobs = sum(1 for job in jobs.values() if job["status"] in {"queued", "running"})
+        if active_jobs >= MAX_CONCURRENT_DOWNLOADS:
+            raise HTTPException(status_code=429, detail="Download queue limit reached. Please wait for a running task to finish.")
+
+        job_id = uuid.uuid4().hex
+        record = _generate_job_record(job_id, payload.url, payload.mode)
         jobs[job_id] = record
 
     executor.submit(download_worker, job_id, payload.url, payload.mode, payload.format_id, payload.audio_quality)
