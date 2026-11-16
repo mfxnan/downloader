@@ -6,14 +6,15 @@ Aplikasi web lokal untuk melihat informasi media dari URL lalu mengunduh video a
 
 | Komponen | Versi / paket |
 | --- | --- |
-| Python | **3.13.x** disarankan. Ini sesuai dengan `runtime.txt` dan versi yang telah digunakan untuk menjalankan proyek. |
+| Python (Windows) | **3.13.x** — sesuai `runtime.txt` dan sudah digunakan untuk menjalankan proyek. |
+| Python (Termux) | Gunakan paket `python` dari repositori Termux. Saat panduan ini diperbarui, repositori Termux menyediakan **Python 3.14.10**; versi paket dapat berubah mengikuti update Termux. |
 | Dependensi Python | Gunakan versi yang dikunci di `requirements.txt` dengan `python -m pip install -r requirements.txt`. |
 | FFmpeg | Versi yang tersedia melalui package manager sistem; harus dapat dipanggil sebagai `ffmpeg`. |
 | Termux | Versi terbaru dari F-Droid atau GitHub resmi Termux. Hindari versi Play Store yang sudah tidak didukung. |
 
 Dependensi utama yang saat ini dipatok adalah FastAPI 0.139.0, Pydantic 2.13.4, pydantic-core 2.46.4, Starlette 1.3.1, Uvicorn 0.50.0, dan yt-dlp 2026.7.4. Jangan memasang versi-versi ini satu per satu; `requirements.txt` juga mengunci dependensi pendukung agar versinya konsisten.
 
-> **Catatan Python di Termux:** `pkg install python` memasang versi Python yang disediakan repositori Termux saat itu; versi patch/minor-nya dapat berubah. Periksa hasil `python --version`. Python 3.13.x adalah target yang disarankan proyek. Jika Termux menyediakan versi lain, instalasi dependensi tetap dapat dicoba, tetapi `pydantic-core` mungkin perlu dibangun dari source dan kompatibilitasnya tidak dijamin oleh konfigurasi proyek.
+> **Catatan versi:** jangan gunakan perintah `pkg install python3.13` di Termux—Termux memasang Python dengan nama paket `python` dan tidak menyediakan pemilihan versi minor seperti itu. `runtime.txt` menyatakan Python 3.13 untuk lingkungan yang menghormati file tersebut, dan Python 3.13 sudah dicoba untuk proyek ini. Untuk Termux, gunakan versi yang disediakan repositori (saat ini 3.14.10). Versi `pydantic-core` yang dipatok menyatakan dukungan Python 3.14, tetapi pada Android mungkin harus dikompilasi dari source; karena itu perlu toolchain Rust dan C.
 
 ## Instalasi di Termux (Android)
 
@@ -21,16 +22,18 @@ Gunakan aplikasi Termux terbaru dari [F-Droid](https://f-droid.org/packages/com.
 
 ```bash
 pkg update
-pkg upgrade
-pkg install git python ffmpeg
+pkg upgrade -y
+pkg install -y git python ffmpeg clang rust
 ```
 
-Pastikan versi yang terpasang dan FFmpeg tersedia:
+Periksa versi Python yang benar-benar terpasang dan pastikan FFmpeg tersedia:
 
 ```bash
 python --version
 ffmpeg -version
 ```
+
+Jika hasil Python bukan 3.14.10 karena repositori sudah diperbarui, tidak perlu mencari paket bernama `python3.13`; lanjutkan dengan Python dari Termux. Versi dependensi tetap dipatok oleh `requirements.txt`.
 
 Simpan proyek di direktori home Termux (bukan folder shared storage), lalu buat virtual environment dan pasang dependensi:
 
@@ -48,14 +51,16 @@ Jika proyek sudah ada di perangkat, lewati `git clone` dan `cd downloader`, lalu
 
 ### Jika instalasi `pydantic-core` gagal
 
-`pydantic-core` memiliki komponen native Rust. Pada Android/Termux, pip bisa saja tidak menemukan wheel yang cocok dan mencoba membangunnya dari source. Jika log instalasi menunjukkan compiler atau Rust toolchain tidak tersedia, pasang toolchain lalu ulangi instalasi:
+`pydantic-core` memiliki komponen native Rust. Pada Android/Termux, pip biasanya perlu membangunnya dari source karena wheel yang tersedia mungkin tidak cocok dengan Android. Perintah instalasi Termux di atas sudah memasang `clang` dan `rust`; jika build tetap gagal, baca pesan error terakhir. Pastikan paket Termux sudah diperbarui dan coba ulang:
 
 ```bash
-pkg install clang rust
+pkg update
+pkg upgrade -y
+pkg install -y clang rust
 python -m pip install -r requirements.txt
 ```
 
-Build native di Android dapat memerlukan waktu dan masih bisa gagal jika versi Python atau toolchain Termux tidak cocok. Jangan menghapus pin versi di `requirements.txt` sebagai langkah pertama; pastikan Python sesuai rekomendasi dan baca pesan error build terlebih dahulu.
+Build native di Android dapat memerlukan waktu dan masih bisa gagal karena keterbatasan atau perubahan toolchain Termux. Jangan menghapus pin versi di `requirements.txt` sebagai langkah pertama.
 
 ### Menjalankan server
 
@@ -109,7 +114,7 @@ Aplikasi membaca konfigurasi berikut dari environment variables:
 ## Pemecahan masalah
 
 - **`No module named ...`** — aktifkan virtual environment proyek lalu jalankan ulang `python -m pip install -r requirements.txt`.
-- **Error build `pydantic-core`** — pastikan memakai Python 3.13.x; di Termux pasang `clang` dan `rust`, kemudian ulangi instalasi.
+- **Error build `pydantic-core`** — di Windows gunakan Python 3.13.x; di Termux gunakan `python` dari repositorinya serta pastikan `clang` dan `rust` terpasang.
 - **Audio tidak menjadi MP3 atau video tidak tergabung dengan benar** — pastikan `ffmpeg -version` berhasil. Tutup dan jalankan ulang server setelah memasang FFmpeg.
 - **Halaman tidak terbuka** — pastikan server masih berjalan dan buka alamat yang sama dengan port yang ditampilkan Uvicorn.
 - **Unduhan gagal dari situs tertentu** — dukungan tergantung extractor `yt-dlp`, perubahan situs, akses jaringan, dan kebutuhan autentikasi situs tersebut.
